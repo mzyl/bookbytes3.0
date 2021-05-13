@@ -1,4 +1,6 @@
 /target
 /books
 
+*.swp
 main
+booklist.txt
