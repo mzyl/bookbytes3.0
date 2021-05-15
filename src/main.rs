@@ -1,57 +1,30 @@
-use rand::Rng;
-use std::fs::File;
-use std::io::Read;
+mod book;
+mod selector;
+
 use std::time::Instant;
+use kuchiki::traits::*;
 
-// get contents from file
-fn get_file(filename: String) -> String {
-    let path = filename;
-    let mut file = File::open(&path).expect("invalid path");
-    let mut text = String::new();
-    file.read_to_string(&mut text)
-        .expect("cannot read the file");
-
-    println!("file had {} bytes", text.len());
-    text
-    //println!("{}", text);
-}
-
-// get file from list of files
-fn get_filename() -> String {
-    let path = "booklist.txt";
-    let mut file = File::open(&path).expect("invalid path");
-    let mut text = String::new();
-    file.read_to_string(&mut text)
-        .expect("cannot read the file");
-
-    let lines : Vec<&str> = text.split('\n').collect();
-    let mut rng = rand::thread_rng();
-    let rand = rng.gen_range(0..lines.len()-1);
-    println!("{}", rand);
-    let line = lines[rand];
-    let line = ["books", line].join("/");
-    println!("Filename: {}", line);
-    line
-}
-
+// main should basically handle webserver stuff and nothing else, I think.
 fn main() {
     let it = Instant::now();
-    let text = get_file(get_filename());
-    let words: Vec<&str> = text.split('\n').collect();
-    let words = words.join(" ");
-    let words: Vec<&str> = words
-        .split('\r')
-        .map(|string| string.trim())
-        .filter(|&lines| !lines.is_empty())
-        .collect();
-    //println!("{:?}", works);
-    println!("{}", words.len());
-    println!("{}", words[50]);
-    /*
-    for line in words.iter() {
-        println!("{}", line);
+    let filename = selector::get_filename();
+    let book = book::Book {
+        filename: filename.clone(),
+        full_html: book::get_html(filename),
+    };
+    println!("{}", book.filename);
+
+    let selector = "h2";
+    let document = kuchiki::parse_html().one(book.full_html);
+
+    for css_match in document.select(selector).unwrap() {
+        let as_node = css_match.as_node();
+        match book::get_text(&as_node) {
+            Some(value) => println!("{}", value),
+            None => {}
+        };
     }
-    */
-    //println!("{:?}", works2);
-    println!("{}", it.elapsed().as_secs_f64());
+
+    println!("{:?}", it.elapsed());
 }
+
