@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 rand = "0.8"
+kuchiki = "0.8.1"
+epub = "1.2.2"
