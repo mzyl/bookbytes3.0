@@ -4,27 +4,32 @@ use crate::selector::*;
 use kuchiki::{NodeData, NodeRef, ElementData};
 
 // book struct
-pub struct Book {
+pub struct Book<'a> {
     pub filename: String, // this isn't in the Go version
-    pub full_html: String,
+    pub full_html: Vec<&'a str>,
+    pub book_text: String,
 // chapter ref index
 // paragraph ref index
 }
 
 // create book function
 
-pub fn get_html(filename: String) -> String {
+pub fn get_html(filename: String) -> Vec<&'static str> {
     let text = crate::selector::get_file(filename);
     let text = String::from_utf8_lossy(&text);
     let words: Vec<&str> = text.split('\n').collect();
     let words = words.join(" ");
-    let words: Vec<&str> = words
+    let html: Vec<&str> = words
         .split('\r')
         .map(|string| string.trim())
         .filter(|&lines| !lines.is_empty())
         .collect();
-    let html: String = words.join(" ");
     html
+}
+
+pub fn get_book_text(html: Vec<&str>) -> String {
+    let book_text: String = html.join(" ");
+    book_text
 }
 
 /// Setter functions
